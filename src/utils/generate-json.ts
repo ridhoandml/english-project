@@ -1,7 +1,6 @@
-import fs from 'fs'
-import path from 'path'
-import process from 'process'
-import { fileURLToPath } from 'url'
+import fs from "fs"
+import path from "path"
+import process from "process"
 
 interface Lesson {
   source: string
@@ -14,8 +13,8 @@ interface Lesson {
 
 const projectRoot = process.cwd()
 
-const imageDirName = 'test-english-grammar'
-const baseDir = path.join(projectRoot, 'public', imageDirName)
+const imageDirName = "test-english-grammar"
+const baseDir = path.join(projectRoot, "public", imageDirName, "image")
 
 try {
   if (!fs.existsSync(baseDir)) throw Error(`Directory not found: ${baseDir}`)
@@ -39,8 +38,8 @@ try {
   
       if (imageFiles.length > 0) {
         const title = lessonFolder
-          .replace(/_/g, ' ')
-          .replace(/-/g, ' ')
+          .replace(/_/g, " ")
+          .replace(/-/g, " ")
           .replace(/\b\w/g, (char: any) => char.toUpperCase())
         const level = levelFolder.replace("grammar-", "")
 
@@ -54,7 +53,10 @@ try {
         })
       }
     }
-    const outputFilePath = path.join(projectRoot, 'public', imageDirName, `${levelFolder}.json`)
+    const outputDir = path.join(projectRoot, "public", imageDirName, "json")
+    if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true })
+
+    const outputFilePath = path.join(outputDir, `${levelFolder}.json`)
     fs.writeFileSync(outputFilePath, JSON.stringify(lessonsData, null, 2))
   }
 } catch (error) {
