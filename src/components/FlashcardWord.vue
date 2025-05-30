@@ -4,8 +4,8 @@
     class="w-max-[500px] sm:w-[500px] lg:w-[400px] relative flex flex-col gap-1 p-2 border border-slate-800 rounded">
     <input
       class="absolute top-3 right-2 border-none outline-none"
-      :value="flashcard.id"
-      v-model="flashcard.id"
+      :value="savedFlashcard[flashcard.id]"
+      v-model="savedFlashcard[flashcard.id]"
       type="checkbox"
       name="saved"
       :id="flashcard.id"
@@ -20,8 +20,10 @@
 <script setup lang="ts">
 import { defineProps } from 'vue'
 import type { TestEnglishGrammarLesson } from '@/utils/generate-json';
+import type { EnglishWordSaved } from '@/views/WordCheck.vue';
 
 defineProps<{
   flashcard: TestEnglishGrammarLesson
+  savedFlashcard: EnglishWordSaved
 }>()
 </script>

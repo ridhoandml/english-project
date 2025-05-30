@@ -3,7 +3,8 @@
     <div class="flex flex-col h-full">
       <div class="flex flex-col self-center gap-4 p-4 sm:p-8 w-full max-w-[600px]">
         <div class="flex gap-1 sm:gap-3 flex-col sm:flex-row justify-between items-center">
-          <h1 class="text-2xl font-bold">{{ material }}</h1>
+          <h1 class="text-2xl font-bold">{{ material.toUpperCase() }}</h1>
+          <span class="text-base"> ({{ savedDataCount }} - {{ flashcardData?.length }})</span>
           <span class="text-base"></span>
         </div>
         <div class="flex gap-4 justify-between">
@@ -30,6 +31,7 @@
           <FlashcardWord 
             v-for="flashcard in flashcardData"
             :flashcard="flashcard"
+            :saved-flashcard="savedData"
           /> 
         </div>
       </div>
@@ -38,21 +40,38 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import FlashcardWord from '@/components/FlashcardWord.vue';
 import { useConfig } from '@/store/config';
 import { storeToRefs } from 'pinia';
 import type { TestEnglishGrammarLesson } from '@/utils/generate-json';
 
-export type JapaneseWordSaved = Record<string, boolean>
+export type EnglishWordSaved = Record<string, boolean>
 const config = useConfig()
 const { getGlobalConfigFromLocal: globalConfigs } = storeToRefs(config)
 
 const router = useRouter();
 const route = useRoute();
-const material = route.params.material
+const material = route.params.material as string
 const flashcardData = ref<TestEnglishGrammarLesson[]>([])
+const savedData = ref<EnglishWordSaved>({})
+
+const savedDataCount = computed(() => {
+  return Object.values(savedData.value).filter(value => value).length
+})
+
+watch(savedData, () => localStorage.setItem(`saved-test-english-${material}`, JSON.stringify(savedData.value)), { deep: true })
+watch(globalConfigs, (v) => config.setAllGlobalConfig(v), { deep: true })
+
+function loadSelection (): EnglishWordSaved | undefined {
+  const data = localStorage.getItem(`saved-test-english-${material}`)
+  if (!data) return undefined
+  return JSON.parse(data);
+}
+
+const isLoaded = loadSelection()
+if (isLoaded) savedData.value = isLoaded
 
 function startLearning() {
   router.push({ name: 'Flashcard' });

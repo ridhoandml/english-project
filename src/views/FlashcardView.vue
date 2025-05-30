@@ -5,15 +5,15 @@
         <h1 class="flex grow text-1xl">{{ material.toUpperCase() }} - Current {{ currentIndex }} of {{ cards.length }}</h1>
         <button @click="back" class="px-4 py-2 bg-gray-800 rounded cursor-pointer">Back</button>
       </div>
-      <div v-if="cards.length > 0" class="flex grow flex-col">
+      <div v-if="cards.length > 0" class="flex grow flex-col gap-4">
         <div class="mt-4 flex items-center gap-16">
-          <button @click="prevCard" class="w-full max-w-60 flex justify-center px-4 py-2 bg-gray-800 rounded cursor-pointer touch-manipulation">
+          <button @click="prevCard" class="w-full max-w-12 sm:max-w-20 md:max-w-32 lg:max-w-60 flex justify-center px-4 py-2 bg-gray-800 rounded cursor-pointer touch-manipulation">
             <i class='bx bx-chevrons-left text-2xl' ></i>
           </button>
           <span class="flex-auto text-center">
             {{ currentCard.title }}
           </span>
-          <button @click="nextCard" class="w-full max-w-60 flex justify-center flex-auto px-4 py-2 bg-gray-800 rounded cursor-pointer touch-manipulation">
+          <button @click="nextCard" class="w-full max-w-12 sm:max-w-20 md:max-w-32 lg:max-w-60 flex justify-center flex-auto px-4 py-2 bg-gray-800 rounded cursor-pointer touch-manipulation">
             <i class='bx bx-chevrons-right text-2xl' ></i>
           </button>
         </div>
@@ -30,11 +30,16 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import type { TestEnglishGrammarLesson } from '@/utils/generate-json';
+import { storeToRefs } from 'pinia';
+import { useConfig } from '@/store/config';
+import shuffleArray from '@/utils/shuffle-array';
 
 const router = useRouter();
 const route = useRoute();
 const material = route.params.material as string;
 
+const config = useConfig()
+const { getGlobalConfigFromLocal: globalConfigs } = storeToRefs(config)
 
 const cards = ref<TestEnglishGrammarLesson[]>([]);
 const currentIndex = ref(0);
@@ -51,12 +56,21 @@ function prevCard() {
   else currentIndex.value = cards.value.length - 1;
 }
 
-onMounted(async () => {
-  const response = await fetch(`/test-english/json/${material}.json`)
-  cards.value = await response.json() as TestEnglishGrammarLesson[]
-})
-
 function back () {
   router.push({ name: 'WordCheck', params: { material } });
 }
+
+function loadSelection (): Record<string, boolean> | undefined {
+  const data = localStorage.getItem(`saved-test-english-${material}`)
+  if (!data) return undefined
+  return JSON.parse(data);
+}
+
+onMounted(async () => {
+  const rememberedCards = loadSelection()
+  const response = await fetch(`/test-english/json/${material}.json`)
+  const loadCards = await response.json() as TestEnglishGrammarLesson[]
+  const filteredCard = rememberedCards ? loadCards.filter(item => !rememberedCards[item.id]) : loadCards
+  cards.value = globalConfigs.value['is-shuffle'] ? shuffleArray(filteredCard) : filteredCard
+})
 </script>
