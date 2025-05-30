@@ -5,8 +5,8 @@ import WordCheck from '@/views/WordCheck.vue';
 
 const routes = [
   { path: '/', name: 'Home', component: FlashcardSelector },
-  { path: '/:level/:type', name: 'WordCheck', component: WordCheck },
-  { path: '/:level/:type/learning', name: 'Flashcard', component: FlashcardView },
+  { path: '/:material', name: 'WordCheck', component: WordCheck },
+  { path: '/:material/learning', name: 'Flashcard', component: FlashcardView },
 ];
 
 export default createRouter({

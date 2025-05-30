@@ -2,8 +2,9 @@ import fs from "fs"
 import path from "path"
 import process from "process"
 
-interface Lesson {
+export interface TestEnglishGrammarLesson {
   source: string
+  id: string
   title: string
   category: string
   level: string
@@ -13,7 +14,7 @@ interface Lesson {
 
 const projectRoot = process.cwd()
 
-const imageDirName = "test-english-grammar"
+const imageDirName = "test-english"
 const baseDir = path.join(projectRoot, "public", imageDirName, "image")
 
 try {
@@ -23,8 +24,13 @@ try {
   .filter((dirent: any) => dirent.isDirectory())
   .map((dirent: any) => dirent.name)
 
+  const outputDir = path.join(projectRoot, "public", imageDirName, "json")
+  if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true })
+
+  fs.writeFileSync(path.join(outputDir, `menu.json`), JSON.stringify(levelFolders, null, 2))
+
   for (const levelFolder of levelFolders) {
-    const lessonsData: Lesson[] = []
+    const lessonsData: TestEnglishGrammarLesson[] = []
 
     const lessonFolders = fs.readdirSync(`${baseDir}/${levelFolder}`, { withFileTypes: true })
     .filter((dirent: any) => dirent.isDirectory())
@@ -34,7 +40,7 @@ try {
       const lessonImagesPath = path.join(baseDir, levelFolder, lessonFolder)
       const imageFiles: string[] = fs.readdirSync(lessonImagesPath)
         .filter((file: any) => /\.(jpg|jpeg|png|gif)$/i.test(file))
-        .map((file: any) => `/${imageDirName}/${levelFolder}/${lessonFolder}/${file}`)
+        .map((file: any) => `/${imageDirName}/image/${levelFolder}/${lessonFolder}/${file}`)
   
       if (imageFiles.length > 0) {
         const title = lessonFolder
@@ -46,6 +52,7 @@ try {
         lessonsData.push({ 
           title,
           level,
+          id: lessonFolder,
           category: "grammar",
           images: imageFiles,
           total: imageFiles.length,
@@ -53,11 +60,8 @@ try {
         })
       }
     }
-    const outputDir = path.join(projectRoot, "public", imageDirName, "json")
-    if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true })
 
-    const outputFilePath = path.join(outputDir, `${levelFolder}.json`)
-    fs.writeFileSync(outputFilePath, JSON.stringify(lessonsData, null, 2))
+    fs.writeFileSync(path.join(outputDir, `${levelFolder}.json`), JSON.stringify(lessonsData, null, 2))
   }
 } catch (error) {
   console.log("Error generate JSON: ", error)

@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "prepare:json": "cp -R src/data/json/* public/",
-    "dev": "npm run prepare:json && vite",
+    "dev": "vite",
     "preview": "vite preview",
     "generate": "tsx ./src/utils/generate-json.ts"
   },
@@ -28,7 +27,6 @@
     "tsx": "^4.19.3",
     "typescript": "~5.7.3",
     "vite": "^6.1.0",
-    "vite-plugin-static-copy": "^2.3.0",
     "vite-plugin-vue-devtools": "^7.7.2",
     "vue-tsc": "^2.2.2"
   }
