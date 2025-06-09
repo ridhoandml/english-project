@@ -11,8 +11,8 @@
       :id="flashcard.id"
     >
     <span class="text-xl">{{ flashcard.title }}</span>
-    <div v-for="image in flashcard.images" :key="image" class="flex items-center justify-center">
-      <img :src="image" :alt="flashcard.title" />
+    <div v-if="!hideImage" v-for="image in flashcard.images" :key="image" class="flex items-center justify-center">
+      <img :src="image" :alt="flashcard.title" loading="lazy" />
     </div>
   </label>
 </template>
@@ -22,8 +22,11 @@ import { defineProps } from 'vue'
 import type { TestEnglishGrammarLesson } from '@/utils/generate-json';
 import type { EnglishWordSaved } from '@/views/WordCheck.vue';
 
-defineProps<{
+withDefaults(defineProps<{
+  hideImage: boolean
   flashcard: TestEnglishGrammarLesson
   savedFlashcard: EnglishWordSaved
-}>()
+}>(), {
+  hideImage: false
+})
 </script>

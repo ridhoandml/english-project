@@ -3,7 +3,7 @@
     <h1 class="text-2xl font-bold">English Flashcard</h1>
     <div v-if="user !== null" class="flex gap-4 items-center">
       <div> Hello {{ user.displayName?.split(" ")[0] }}! </div>
-      <button class="flex items-center gap-2 px-2 py-1 border border-white text-white rounded cursor-pointer" @click="signOutUser">
+      <button class="flex items-center gap-2 px-2 py-1 border border-red-300 text-red-300 rounded cursor-pointer" @click="signOutUser">
         Logout
       </button>
     </div>
@@ -20,7 +20,7 @@
         v-for="list in lists"
         :key="list"
         class="flex flex-col px-4 py-2 bg-blue-500 text-white rounded cursor-pointer"
-        @click="selectType(list)"
+        @click="router.push({ name: 'WordCheck', params: { material: list } })"
       >
         {{ capitalizeAll(list) }}
       </button>
@@ -29,12 +29,10 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import capitalizeAll from '@/utils/capitalize-all'
 import { useAuth } from '@/store/auth'
-import { onAuthStateChanged, type Unsubscribe } from 'firebase/auth'
-import initializationFirebase from '@/firebase/initialization'
 import { storeToRefs } from 'pinia'
 import { signInWithGoogle, signOutUser } from '@/firebase/sign-in-google'
 
@@ -45,23 +43,8 @@ const { user } = storeToRefs(authStore)
 const source = ref("test-english")
 const lists = ref<string[]>([])
 
-let unsubscribeAuth: Unsubscribe | undefined
-
-function selectType(material: string) {
-  router.push({ name: 'WordCheck', params: { material } })
-}
-
 onMounted(async () => {
-  const firebase = initializationFirebase()
-  unsubscribeAuth = onAuthStateChanged(firebase.auth, (currentUser) => {
-    authStore.setUser(currentUser)
-  })
-  
   const response = await fetch(`/test-english/json/menu.json`)
   lists.value = await response.json() as string[]
-})
-
-onUnmounted(() => {
-  if (unsubscribeAuth) unsubscribeAuth()
 })
 </script>
